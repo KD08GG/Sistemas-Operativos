@@ -16,7 +16,7 @@ void verificarError(int resultado) {
             printf("Error: Problema de permisos para acceder al archivo.\n");
         } else if (errno == EBADF) {
             printf("Error: Mal descriptor de archivo.\n"); 
-            // Mensaje usando perror [cite: 432, 542]
+            // Mensaje usando perror
             perror("Error detectado"); 
         }
         exit(1); 
@@ -64,7 +64,7 @@ int main() {
     close(fd);
 
     //Ejercicio Opcional - 0 a la izquierda
-    printf("\nEjercicio Opcional - 0 a la izquierda\n");
+    printf("\nEjercicio Opcional\n");
     int entrada[] = {1, 2, 0, 4, 9, 0, 3, 5, 1, 3};
     int salida[10];
     int pos = 0;

@@ -1,45 +1,56 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
+// Hijo N: escribe 10 enteros pares a N.txt
+void proceso_N() {
+    FILE *f = fopen("N.txt", "w");
+    int i;
+    for (i = 2; i <= 20; i += 2)
+        fprintf(f, "%d\n", i);
+    fclose(f);
+    exit(0);
+}
+
+// Hijo M: escribe 10 enteros impares a M.txt
+void proceso_M() {
+    FILE *f = fopen("M.txt", "w");
+    int i;
+    for (i = 1; i <= 19; i += 2)
+        fprintf(f, "%d\n", i);
+    fclose(f);
+    exit(0);
+}
+
+// Padre R: espera a sus hijos, lee los archivos y suma elemento por elemento
 int main() {
-    // Crea primer hijo (N)
-    if (fork() == 0) {
-        FILE *archivoN = fopen("N.txt", "w");
-        for (int i = 1; i <= 10; i++) {
-            fprintf(archivoN, "%d\n", i * 2); // Escribe 2, 4, 6 -
-        }
-        fclose(archivoN);
-        exit(0); // El hijo N termina
-    }
+    pid_t pid_N = -1, pid_M = -1;
+    int status;
 
-    // Crea segundo hijo (M)
-    if (fork() == 0) {
-        FILE *archivoM = fopen("M.txt", "w");
-        for (int i = 0; i < 10; i++) {
-            fprintf(archivoM, "%d\n", (i * 2) + 1); // Escribe 1, 3, 5
-        }
-        fclose(archivoM);
-        exit(0); // El hijo M termina
-    }
+    pid_N = fork();
+    if (pid_N == 0)
+        proceso_N();
 
-    // --- EL PADRE (R) ---
-    // Sleep para dar 3 segundos a los hijos y asegurar que los archivos ya existan.
-    sleep(3); 
+    pid_M = fork();
+    if (pid_M == 0)
+        proceso_M();
 
-    FILE *fN = fopen("N.txt", "r");
-    FILE *fM = fopen("M.txt", "r");
-    int numN, numM;
+    // Padre espera a ambos hijos
+    wait(&status);
+    wait(&status);
 
-    printf("Ejecución del programa:\n");    
-    for (int i = 0; i < 10; i++) {
-        fscanf(fN, "%d", &numN);
-        fscanf(fM, "%d", &numM);
-        printf("%d + %d = %d\n", numM, numN, numM + numN);
-    }
+    // Leer archivos y sumar
+    FILE *fn = fopen("N.txt", "r");
+    FILE *fm = fopen("M.txt", "r");
 
-    fclose(fN);
-    fclose(fM);
+    int par, impar;
+    while (fscanf(fm, "%d", &impar) == 1 && fscanf(fn, "%d", &par) == 1)
+        printf("%d + %d = %d\n", impar, par, impar + par);
+
+    fclose(fn);
+    fclose(fm);
 
     return 0;
 }

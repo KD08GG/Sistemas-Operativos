@@ -1,40 +1,46 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
-#include <fcntl.h>
+#include <sys/types.h>
 
-void print_pid(char name)
-{
-    printf("Soy el %c.\n", name);
-    printf("Mi ID es %d.\n", getpid());
-    printf("El ID de mi padre es %d.\n\n", getppid());
-}
+int main() {
+    pid_t pid_M;
 
-int main()
-{
-    pid_t pid_a, pid_b = -1;
+    // Se crea el proceso hijo M
+    pid_M = fork();
 
-    // Create the first son
-    pid_a = fork();
+    if (pid_M == 0) {
+        // --- HIJO M ---
+        // Abre el archivo datos.txt para escribir (w) 
+        FILE *archivo = fopen("datos.txt", "w");
+        
+        // Escribe 5 enteros en el archivo 
+        for (int i = 1; i <= 5; i++) {
+            fprintf(archivo, "%d\n", i);
+        }
+        
+        fclose(archivo);
+        // El hijo termina aquí para no ejecutar código del padre
+        exit(0); 
+    } 
+    else if (pid_M > 0) {
+        // --- PADRE Q ---
+        // El padre espera 3 segundos como dice la nota 
+        printf("Padre Q: Esperando 3 segundos...\n");
+        sleep(3);
 
-    if(pid_a == 0)
-    {
-        print_pid('A');
-        exit(0);
+        // Abre el archivo para leer (r) 
+        FILE *archivo = fopen("datos.txt", "r");
+        int numero;
+
+        printf("Datos leidos por el Padre Q:\n");
+        // Lee del archivo e imprime en pantalla 
+        while (fscanf(archivo, "%d", &numero) != EOF) {
+            printf("%d\n", numero);
+        }
+
+        fclose(archivo);
     }
-
-    // Create the second son
-    pid_b = fork();
-
-    if(pid_b == 0)
-    {
-        print_pid('B');
-        exit(0);
-    }
-
-    print_pid('Z'); // El proceso original se identifica como 'P'
 
     return 0;
 }

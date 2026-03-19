@@ -6,8 +6,8 @@
 int main() 
 {
     pid_t pid = -1;
-    //int x = 5, y = 10;
-    int x = x + 10, y = y + 6;
+    int x = 5, y = 10;
+    //int x = x + 10, y = y + 6;
 
     pid = fork(); 
 
